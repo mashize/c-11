@@ -1,0 +1,47 @@
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+std::mutex my_lock;
+void add(int &num, int &sum) {
+	while (true) {
+		std::lock_guard<std::mutex> lock(my_lock);
+		if (num < 100) { //运行条件
+			num += 1;
+			sum += num;
+		}
+		else {  //退出条件
+			break;
+		}
+	}
+}
+
+void add1(int &a)
+{
+	for (int i = 0; i < 100; ++i) {
+		std::lock_guard<std::mutex> lock(my_lock);
+		++a;
+		std::cout<< a << std::endl;
+	}
+}
+void add2(int &a)
+{
+	for (int i = 0; i < 100; ++i) {
+		std::lock_guard<std::mutex> lock(my_lock);
+		++a;
+		std::cout<< a << std::endl;
+	}
+}
+
+int main() {
+	int a = 0;
+	int b = 0;
+	std::thread t1(add1, std::ref(a));
+	std::thread t2(add2, std::ref(a));
+	t1.join();
+	t2.join();
+	std::cout << a << std::endl;
+	return 0;
+}
